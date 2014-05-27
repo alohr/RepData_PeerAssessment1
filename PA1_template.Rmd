@@ -2,18 +2,57 @@
 
 
 ## Loading and preprocessing the data
+```{r}
+readActivity <- function() {
+  activity <- read.csv("activity.csv", colClasses = c("integer", "Date", "integer"))
+  
+  within(activity, {
+    date = as.factor(date)
+  })
+}
 
+activity = readActivity()
+```
 
 
 ## What is mean total number of steps taken per day?
+```{r}
+library(plyr)
 
+stepsPerDay <- ddply(activity, .(date), summarize, "steps" = sum(steps))
+summary(round(stepsPerDay$steps))
+```
 
+```{r,fig.width=11,fig.align='center'}
+library(ggplot2, warn.conflicts=F)
+
+qplot(steps, data = na.omit(stepsPerDay), binwidth = 400, alpha = I(0.8),
+      main = "Histogram of the total number of steps taken each day")
+```
 
 ## What is the average daily activity pattern?
+Make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken,
+averaged across all days (y-axis).
 
+```{r,fig.width=11,fig.align='center'}
+stepsAverage <- ddply(na.omit(activity), .(interval), summarize, "steps" = round(mean(steps)))
+qplot(interval, steps, data = stepsAverage, geom = "line")
+```
+
+Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+```{r}
+stepsAverage[stepsAverage$steps == max(stepsAverage$steps), "interval"]
+```
 
 
 ## Imputing missing values
+
+1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+
+```{r}
+sum(is.na(activity))
+```
 
 
 
